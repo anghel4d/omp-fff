@@ -190,6 +190,19 @@ pub fn rewrite_remote_to_local(body: &str, remote_prefix: &str, local_root: &str
     String::from_utf8_lossy(&out).into_owned()
 }
 
+/// Apply `rewrite_remote_to_local` once per (remote_prefix, local_root)
+/// mapping, longest remote prefix first so a more specific mapping wins over
+/// a broader sibling. Single-root bodies are unaffected; cross-root listings
+/// (the upstream UNINDEXED_PATH "Indexed roots: " line) come out fully local
+/// instead of leaving sibling drives half-converted (`D:/Projects`).
+pub fn rewrite_remote_to_local_all(body: &str, mappings: &[(String, String)]) -> String {
+    let mut sorted: Vec<&(String, String)> = mappings.iter().collect();
+    sorted.sort_by(|a, b| b.0.len().cmp(&a.0.len()).then_with(|| a.0.cmp(&b.0)));
+    sorted.iter().fold(body.to_string(), |acc, (remote, local)| {
+        rewrite_remote_to_local(&acc, remote, local)
+    })
+}
+
 fn prefix_matches_at(bytes: &[u8], at: usize, prefix: &[u8], windows: bool) -> bool {
     if at + prefix.len() > bytes.len() {
         return false;
@@ -547,6 +560,38 @@ mod tests {
         assert_eq!(
             forward.rewrite_to_local("Indexed roots: C:\\Users\\Pyrus, C:\\proj\n", "/mnt/c"),
             "Indexed roots: /mnt/c/Users/Pyrus, /mnt/c/proj\n"
+        );
+    }
+
+    #[test]
+    fn rewrite_all_localizes_every_sibling_drive_in_roots_listing() {
+        let mappings = vec![
+            ("C:\\".to_string(), "/mnt/c".to_string()),
+            ("D:\\".to_string(), "/mnt/d".to_string()),
+            ("F:\\".to_string(), "/mnt/f".to_string()),
+        ];
+        let body = concat!(
+            "UNINDEXED_PATH: C:\\ is not under any FFF-indexed root.\n",
+            "Indexed roots: C:\\ai, C:\\Users\\Pyrus\\Sync, D:\\Projects, F:\\ArchMigration\\projects\n",
+            "Use native grep/glob/read for this path.\n",
+        );
+        let expected = concat!(
+            "UNINDEXED_PATH: C:\\ is not under any FFF-indexed root.\n",
+            "Indexed roots: /mnt/c/ai, /mnt/c/Users/Pyrus/Sync, /mnt/d/Projects, /mnt/f/ArchMigration/projects\n",
+            "Use native grep/glob/read for this path.\n",
+        );
+        assert_eq!(rewrite_remote_to_local_all(body, &mappings), expected);
+    }
+
+    #[test]
+    fn rewrite_all_prefers_longest_prefix_regardless_of_input_order() {
+        let mappings = vec![
+            ("C:\\".to_string(), "/mnt/c".to_string()),
+            ("C:\\Users\\Pyrus".to_string(), "/mnt/c/Users/Pyrus".to_string()),
+        ];
+        assert_eq!(
+            rewrite_remote_to_local_all("C:\\Users\\Pyrus\\proj\\a.rs\n", &mappings),
+            "/mnt/c/Users/Pyrus/proj/a.rs\n"
         );
     }
 

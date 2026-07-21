@@ -60,7 +60,17 @@ async fn forward_request(state: &AppState, params: &Params, route: &str) -> Opti
                 let probe_root = Arc::clone(root);
                 tokio::spawn(async move { forward::probe_and_apply(&probe_root).await });
             }
-            let rewritten = target_config.rewrite_to_local(&body, &root.path.to_string_lossy());
+            let mappings: Vec<(String, String)> = state
+                .roots
+                .iter()
+                .filter_map(|peer| {
+                    let peer_forward = peer.forward.as_ref()?;
+                    (peer_forward.authority == target_config.authority).then(|| {
+                        (peer_forward.remote_prefix.clone(), peer.path.to_string_lossy().into_owned())
+                    })
+                })
+                .collect();
+            let rewritten = forward::rewrite_remote_to_local_all(&body, &mappings);
             Some(proxied_response(status, content_type, rewritten))
         }
         Err(error) => {
