@@ -1,0 +1,26 @@
+# Whitelist, per rgbcu.be/blog/gitignore: ignore everything, re-include by name.
+# Overrides the repo-root `!files/**` for this vendored project so build output
+# (target/, node_modules/, dist/, *.tsbuildinfo …) is all covered by `*`.
+*
+
+!.gitignore
+!README.md
+!PROTOCOL.md
+!LICENSE
+
+# Rust workspace — manifests + sources only; target/ stays ignored by `*`.
+!Cargo.toml
+!Cargo.lock
+!crates/
+!crates/**/
+!crates/**/Cargo.toml
+!crates/**/*.rs
+
+# OMP extension — TypeScript sources + manifests only; node_modules/ & any build
+# output stay ignored (do NOT whitelist extension/**, it would catch .d.ts etc.).
+!extension/
+!extension/src/
+!extension/src/**/
+!extension/src/**/*.ts
+!extension/package.json
+!extension/tsconfig.json

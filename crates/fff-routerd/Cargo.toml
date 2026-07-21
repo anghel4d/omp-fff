@@ -1,0 +1,15 @@
+[package]
+name = "fff-routerd"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Resident multi-root FFF search daemon: warm indexes over a Unix-socket HTTP wire with published health snapshots"
+
+[dependencies]
+fff = { package = "fff-search", version = "0.10.0", default-features = false, features = ["ripgrep", "definitions"] }
+fff-query-parser = { version = "0.10.0", default-features = false, features = ["ripgrep"] }
+axum = "0.8"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "signal", "time"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+mimalloc = "0.1"
