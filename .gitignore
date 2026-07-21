@@ -24,3 +24,15 @@
 !extension/src/**/*.ts
 !extension/package.json
 !extension/tsconfig.json
+!extension/bun.lock
+
+# Extension tests — sources only; bun's coverage/cache output stays ignored.
+!extension/test/
+!extension/test/**/
+!extension/test/**/*.ts
+
+# Bench harnesses — sources plus the recorded A/B results.
+!bench/
+!bench/**/
+!bench/**/*.ts
+!bench/results.json
