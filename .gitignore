@@ -31,8 +31,3 @@
 !extension/test/**/
 !extension/test/**/*.ts
 
-# Bench harnesses — sources plus the recorded A/B results.
-!bench/
-!bench/**/
-!bench/**/*.ts
-!bench/results.json
