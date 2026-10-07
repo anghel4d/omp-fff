@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "oh-my-pi extension: ffgrep/fffind/fff-multi-grep served by a resident fff-routerd over a Unix domain socket",
   "type": "module",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "repository": "github:anghel4d/omp-fff",
   "omp": { "extensions": ["./src/index.ts"] },
   "devDependencies": {

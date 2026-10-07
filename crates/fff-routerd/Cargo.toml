@@ -2,7 +2,7 @@
 name = "fff-routerd"
 version = "0.1.0"
 edition = "2021"
-license = "MIT"
+license-file = "../../LICENSE"
 description = "Resident multi-root FFF search daemon: warm indexes over a Unix-socket HTTP wire with published health snapshots"
 
 [dependencies]
